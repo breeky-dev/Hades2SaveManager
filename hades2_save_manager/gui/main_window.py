@@ -177,6 +177,7 @@ class MainWindow(tk.Tk):
         self.carousel = SnapshotCarousel(content)
         self.carousel.pack(fill=tk.X, pady=(0, 10))
         self.carousel.set_on_select_callback(self._on_snapshot_selected)
+        self.carousel.set_on_delete_callback(self._delete_snapshots)
         
         # Separator
         ttk.Separator(content, orient=tk.HORIZONTAL).pack(fill=tk.X, pady=(0, 10))

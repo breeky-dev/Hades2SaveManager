@@ -1,7 +1,7 @@
 """Snapshot carousel widget for browsing snapshots visually."""
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from pathlib import Path
 from typing import List, Optional, Callable
 import logging
@@ -36,14 +36,23 @@ class SnapshotCarousel(ttk.Frame):
         self.selected_index: Optional[int] = None
         self.thumbnail_widgets: List[tk.Frame] = []
         self.on_select_callback: Optional[Callable] = None
+        self.on_delete_callback: Optional[Callable] = None
         
         self.thumbnail_size = (200, 150)
         self.placeholder_image = None
         
         self._create_widgets()
+        self._create_context_menu()
         
         if PIL_AVAILABLE:
             self._create_placeholder_image()
+    
+    def _create_context_menu(self):
+        """Create context menu for thumbnails."""
+        self.context_menu = tk.Menu(self, tearoff=0)
+        self.context_menu.add_command(label="Delete", command=self._on_delete_from_menu)
+        self.context_menu.add_separator()
+        self.context_menu.add_command(label="Restore", command=self._on_restore_from_menu)
     
     def _create_widgets(self):
         """Create carousel widgets."""
@@ -196,10 +205,13 @@ class SnapshotCarousel(ttk.Frame):
         )
         info_label.pack(fill=tk.X)
         
-        # Bind click event
+        # Bind click events
         frame.bind('<Button-1>', lambda e, idx=index: self._on_thumbnail_click(idx))
+        frame.bind('<Button-3>', lambda e, idx=index: self._on_thumbnail_right_click(idx, e))
+        
         for child in frame.winfo_children():
             child.bind('<Button-1>', lambda e, idx=index: self._on_thumbnail_click(idx))
+            child.bind('<Button-3>', lambda e, idx=index: self._on_thumbnail_right_click(idx, e))
         
         return frame
     
@@ -219,12 +231,13 @@ class SnapshotCarousel(ttk.Frame):
             )
             label.pack()
     
-    def _on_thumbnail_click(self, index: int):
+    def _on_thumbnail_click(self, index: int, event=None):
         """
         Handle thumbnail click.
         
         Args:
             index: Index of clicked thumbnail
+            event: Event object (optional)
         """
         # Update selection
         old_index = self.selected_index
@@ -241,6 +254,62 @@ class SnapshotCarousel(ttk.Frame):
         if self.on_select_callback and index < len(self.snapshots):
             try:
                 self.on_select_callback(self.snapshots[index])
+            except Exception as e:
+                logger.error(f"Error in select callback: {e}")
+    
+    def _on_thumbnail_right_click(self, index: int, event):
+        """
+        Handle thumbnail right-click.
+        
+        Args:
+            index: Index of clicked thumbnail
+            event: Event object with x_root and y_root
+        """
+        # Select the thumbnail
+        self._on_thumbnail_click(index)
+        
+        # Show context menu
+        try:
+            self.context_menu.post(event.x_root, event.y_root)
+        except Exception as e:
+            logger.error(f"Error showing context menu: {e}")
+    
+    def _on_delete_from_menu(self):
+        """Handle delete from context menu."""
+        if self.selected_index is None or self.selected_index >= len(self.snapshots):
+            return
+        
+        snapshot = self.snapshots[self.selected_index]
+        
+        # Confirm deletion
+        if messagebox.askyesno(
+            "Confirm Delete",
+            f"Delete snapshot from {get_time_ago(snapshot.timestamp)}?",
+            parent=self
+        ):
+            # Call delete callback
+            if self.on_delete_callback:
+                try:
+                    self.on_delete_callback([snapshot])
+                except Exception as e:
+                    logger.error(f"Error in delete callback: {e}")
+                    messagebox.showerror(
+                        "Delete Error",
+                        f"Failed to delete snapshot: {e}",
+                        parent=self
+                    )
+    
+    def _on_restore_from_menu(self):
+        """Handle restore from context menu."""
+        if self.selected_index is None or self.selected_index >= len(self.snapshots):
+            return
+        
+        snapshot = self.snapshots[self.selected_index]
+        
+        # Call select callback (which triggers restore in main window)
+        if self.on_select_callback:
+            try:
+                self.on_select_callback(snapshot)
             except Exception as e:
                 logger.error(f"Error in select callback: {e}")
     
@@ -263,6 +332,15 @@ class SnapshotCarousel(ttk.Frame):
             callback: Function that takes a Snapshot object as parameter
         """
         self.on_select_callback = callback
+    
+    def set_on_delete_callback(self, callback: Callable):
+        """
+        Set callback to be called when snapshots should be deleted.
+        
+        Args:
+            callback: Function that takes a list of Snapshot objects as parameter
+        """
+        self.on_delete_callback = callback
     
     def clear(self):
         """Clear all snapshots from the carousel."""
