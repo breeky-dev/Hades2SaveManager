@@ -146,9 +146,8 @@ class SnapshotList(ttk.Frame):
                 "Yes" if snapshot.has_screenshot else "No"
             )
             
-            # Store snapshot reference in item
-            item_id = self.tree.insert('', tk.END, values=values)
-            self.tree.set(item_id, '#0', str(snapshot.path))
+            # Store snapshot reference in item using tags
+            item_id = self.tree.insert('', tk.END, values=values, tags=(str(snapshot.path),))
     
     def _get_sorted_snapshots(self) -> List[Snapshot]:
         """Get snapshots sorted by current sort column."""
@@ -227,10 +226,13 @@ class SnapshotList(ttk.Frame):
             Snapshot object or None
         """
         try:
-            path_str = self.tree.set(item_id, '#0')
-            for snapshot in self.snapshots:
-                if str(snapshot.path) == path_str:
-                    return snapshot
+            # Get the path from item tags
+            tags = self.tree.item(item_id, 'tags')
+            if tags:
+                path_str = tags[0]
+                for snapshot in self.snapshots:
+                    if str(snapshot.path) == path_str:
+                        return snapshot
         except Exception as e:
             logger.error(f"Failed to get snapshot from item: {e}")
         return None
