@@ -181,9 +181,12 @@ def find_profile_files(save_dir: Path, profile_num: int) -> List[Path]:
         if temp_save.exists():
             files.append(temp_save)
         
-        # Backup files
-        for backup_file in save_dir.glob(f"Profile{profile_num}.sav.bak*"):
-            files.append(backup_file)
+        # Backup files - find all files that match Profile{N}.sav.bak*
+        # This includes .sav.bak, .sav.bak1, .sav.bak2, etc.
+        pattern = f"Profile{profile_num}.sav.bak*"
+        for backup_file in save_dir.glob(pattern):
+            if backup_file.is_file():
+                files.append(backup_file)
     
     except Exception as e:
         logger.error(f"Failed to find profile files: {e}")

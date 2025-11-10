@@ -106,10 +106,11 @@ class SaveFileEventHandler(FileSystemEventHandler):
             True if it's a save file
         """
         name = file_path.name
+        # Check for .sav files, _Temp.sav files, and .sav.bak* files (including numbered backups)
         return (
             name.endswith('.sav') or
             name.endswith('_Temp.sav') or
-            name.endswith('.sav.bak')
+            '.sav.bak' in name
         )
 
 
@@ -157,6 +158,12 @@ class SnapshotWatcher:
             return True
         
         try:
+            # Validate save directory exists
+            save_dir = self.snapshot_manager.save_dir
+            if not save_dir.exists():
+                logger.error(f"Save directory does not exist: {save_dir}")
+                return False
+            
             # Create event handler
             self.event_handler = SaveFileEventHandler(
                 self.event_queue,
@@ -167,7 +174,7 @@ class SnapshotWatcher:
             self.observer = Observer()
             self.observer.schedule(
                 self.event_handler,
-                str(self.snapshot_manager.save_dir),
+                str(save_dir),
                 recursive=True
             )
             
