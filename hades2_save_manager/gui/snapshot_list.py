@@ -202,10 +202,16 @@ class SnapshotList(ttk.Frame):
                     logger.error(f"Error in select callback: {e}")
     
     def _on_double_click(self, event):
-        """Handle double-click on item."""
+        """Handle double-click on item to show screenshot viewer."""
         selected_items = self.tree.selection()
         if len(selected_items) == 1:
-            self._on_restore_selected()
+            snapshot = self._get_snapshot_from_item(selected_items[0])
+            if snapshot and snapshot.has_screenshot:
+                try:
+                    from hades2_save_manager.gui.screenshot_viewer import show_screenshot_viewer
+                    show_screenshot_viewer(self.winfo_toplevel(), snapshot)
+                except Exception as e:
+                    logger.error(f"Error showing screenshot viewer: {e}")
     
     def _show_context_menu(self, event):
         """Show context menu."""

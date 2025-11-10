@@ -208,10 +208,12 @@ class SnapshotCarousel(ttk.Frame):
         # Bind click events
         frame.bind('<Button-1>', lambda e, idx=index: self._on_thumbnail_click(idx))
         frame.bind('<Button-3>', lambda e, idx=index: self._on_thumbnail_right_click(idx, e))
+        frame.bind('<Double-Button-1>', lambda e, idx=index: self._on_thumbnail_double_click(idx))
         
         for child in frame.winfo_children():
             child.bind('<Button-1>', lambda e, idx=index: self._on_thumbnail_click(idx))
             child.bind('<Button-3>', lambda e, idx=index: self._on_thumbnail_right_click(idx, e))
+            child.bind('<Double-Button-1>', lambda e, idx=index: self._on_thumbnail_double_click(idx))
         
         return frame
     
@@ -273,6 +275,28 @@ class SnapshotCarousel(ttk.Frame):
             self.context_menu.post(event.x_root, event.y_root)
         except Exception as e:
             logger.error(f"Error showing context menu: {e}")
+    
+    def _on_thumbnail_double_click(self, index: int):
+        """
+        Handle thumbnail double-click to show screenshot viewer.
+        
+        Args:
+            index: Index of double-clicked thumbnail
+        """
+        if index >= len(self.snapshots):
+            return
+        
+        snapshot = self.snapshots[index]
+        
+        # Only show viewer if snapshot has a screenshot
+        if not snapshot.has_screenshot:
+            return
+        
+        try:
+            from hades2_save_manager.gui.screenshot_viewer import show_screenshot_viewer
+            show_screenshot_viewer(self.winfo_toplevel(), snapshot)
+        except Exception as e:
+            logger.error(f"Error showing screenshot viewer: {e}")
     
     def _on_delete_from_menu(self):
         """Handle delete from context menu."""
