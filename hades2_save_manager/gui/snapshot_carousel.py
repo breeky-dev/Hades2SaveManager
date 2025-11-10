@@ -13,8 +13,8 @@ except ImportError:
     PIL_AVAILABLE = False
     logging.warning("PIL not available. Carousel will not display images.")
 
-from ..services import Snapshot
-from ..utils import format_timestamp, get_time_ago
+from hades2_save_manager.services import Snapshot
+from hades2_save_manager.utils import format_timestamp, get_time_ago
 
 logger = logging.getLogger(__name__)
 

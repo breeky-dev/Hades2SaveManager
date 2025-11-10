@@ -14,10 +14,10 @@ except ImportError:
     PSUTIL_AVAILABLE = False
     logging.warning("psutil not available. Game process checking will be disabled.")
 
-from ..services import SnapshotManager, SnapshotWatcher, Snapshot
-from .snapshot_carousel import SnapshotCarousel
-from .snapshot_list import SnapshotList
-from .settings_dialog import show_settings_dialog
+from hades2_save_manager.services import SnapshotManager, SnapshotWatcher, Snapshot
+from hades2_save_manager.gui.snapshot_carousel import SnapshotCarousel
+from hades2_save_manager.gui.snapshot_list import SnapshotList
+from hades2_save_manager.gui.settings_dialog import show_settings_dialog
 
 logger = logging.getLogger(__name__)
 

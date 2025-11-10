@@ -5,8 +5,8 @@ from tkinter import ttk, messagebox
 from typing import List, Optional, Callable
 import logging
 
-from ..services import Snapshot
-from ..utils import format_timestamp, format_file_size, get_time_ago
+from hades2_save_manager.services import Snapshot
+from hades2_save_manager.utils import format_timestamp, format_file_size, get_time_ago
 
 logger = logging.getLogger(__name__)
 

@@ -14,8 +14,8 @@ except ImportError:
     WATCHDOG_AVAILABLE = False
     logging.warning("Watchdog not available. Install watchdog for auto-snapshot functionality.")
 
-from ..utils import extract_profile_number, should_create_new_snapshot, get_timestamp
-from .snapshot_manager import SnapshotManager
+from hades2_save_manager.utils import extract_profile_number, should_create_new_snapshot, get_timestamp
+from hades2_save_manager.services.snapshot_manager import SnapshotManager
 
 logger = logging.getLogger(__name__)
 

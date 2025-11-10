@@ -27,7 +27,7 @@ def main():
         logger.info("Starting Hades II Save Manager")
         
         # Import GUI after logging is configured
-        from .gui import MainWindow
+        from hades2_save_manager.gui import MainWindow
         
         # Create and run application
         app = MainWindow()

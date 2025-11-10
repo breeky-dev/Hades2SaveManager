@@ -6,7 +6,7 @@ import logging
 import json
 from dataclasses import dataclass, asdict
 
-from ..utils import (
+from hades2_save_manager.utils import (
     safe_copy_files,
     safe_delete_directory,
     get_directory_size,
@@ -17,7 +17,7 @@ from ..utils import (
     parse_snapshot_folder_name,
     format_timestamp
 )
-from .screen_capture import ScreenCapture
+from hades2_save_manager.services.screen_capture import ScreenCapture
 
 logger = logging.getLogger(__name__)
 
